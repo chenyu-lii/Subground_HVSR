@@ -850,7 +850,19 @@ class HVSR_inversion(object):
         L1_all = np.sum((np.abs(hvsr_2 - hvsr))**1)
         L1_grad = np.sum(np.abs(np.gradient(hvsr_2) - np.gradient(hvsr))**2)
         L1 = 0.6*(0.5*L1_peak + 0.5*L1_all) + 0.4*L1_grad
-        return L1
+
+	# Compute RMS of Dispersion curve 
+	from BayHunter.surf96_modsw import SurfDisp
+	model = SurfDisp(obsx=x_obs, ref="rdispph")
+	vp_new = Vp/1000
+	vs_new = Vs/1000
+	h_new = h/1000
+	xmod, ymod = model.run_model(h, vp_new, vs_new, rho)
+	rms_disp = np.sqrt(np.mean((ymod - yobs)**2))
+	L2 = L1*0.6 + rms_disp*0.4
+	    
+        #return L1
+	return L2
 
 
     def MCMC_step(self,i):
