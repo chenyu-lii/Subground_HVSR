@@ -763,8 +763,10 @@ class HVSR_inversion(object):
                     n_burn = 1,
                     L1_old = None,
                     Hfac = 100,
-                    Vfac = 2000
+                    Vfac = 2000,
 
+                    disp_freq = None,  # input dispersion curve frequency
+                    disp_v = None,
 
 					):
             self.fre1 = fre1
@@ -797,6 +799,10 @@ class HVSR_inversion(object):
             self.L1_old = L1_old
             self.Hfac = Hfac
             self.Vfac = Vfac
+
+            # input dispersion curve
+            self.disp_freq = disp_freq
+            self.disp_v = disp_v
 
     def moving_average(self, a, n=3) :
         ret = np.cumsum(a, dtype=float)
@@ -851,18 +857,25 @@ class HVSR_inversion(object):
         L1_grad = np.sum(np.abs(np.gradient(hvsr_2) - np.gradient(hvsr))**2)
         L1 = 0.6*(0.5*L1_peak + 0.5*L1_all) + 0.4*L1_grad
 
-	# Compute RMS of Dispersion curve 
-	from BayHunter.surf96_modsw import SurfDisp
-	model = SurfDisp(obsx=x_obs, ref="rdispph")
-	vp_new = Vp/1000
-	vs_new = Vs/1000
-	h_new = h/1000
-	xmod, ymod = model.run_model(h, vp_new, vs_new, rho)
-	rms_disp = np.sqrt(np.mean((ymod - yobs)**2))
-	L2 = L1*0.6 + rms_disp*0.4
+        # Compute RMS of Dispersion curve 
+        from BayHunter.surf96_modsw import SurfDisp
+        x_obs = self.disp_freq
+        yobs = self.disp_v
+        model = SurfDisp(obsx=x_obs, ref="rdispph")
+        vp_new = Vp/1000
+        vs_new = Vs/1000
+        h_new = h/1000
+        ro_new = ro/1000
+        xmod, ymod = model.run_model(h_new, vp_new, vs_new, ro_new)
+        print('freq:',xmod)
+        print('ymod:',ymod)
+        rms_disp = np.sqrt(np.mean((ymod - yobs)**2))
+        L2 = L1*0.6 + rms_disp*0.4
+        print(L1, rms_disp)
 	    
         #return L1
-	return L2
+        return L2
+	    #return L1, L2
 
 
     def MCMC_step(self,i):
