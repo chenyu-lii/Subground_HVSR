@@ -854,7 +854,8 @@ class HVSR_inversion(object):
         if (np.any(Vs_copy > 5000)):
             hvsr_2=np.ones_like(hvsr) * 1e9
         #if (np.any(Vs < 100)):
-        if (np.any(Vs_copy < 100)):
+        #if (np.any(Vs_copy < 100)):
+        if (np.any(Vs_copy < 150)):    # minimum vs 150m/s
             hvsr_2=np.ones_like(hvsr) * 1e9
         #print("   h:",h)
         #if (np.any(h < 0)):
@@ -891,7 +892,7 @@ class HVSR_inversion(object):
             rms_new = 0.0 
         rms_new = rms_disp/abs(obs_range)
         L2 = L1 + rms_new
-        print(L1, rms_new, L2)
+        #print(L1, rms_new, L2)
 	    
         #return L1
         return L2
@@ -987,7 +988,7 @@ class HVSR_inversion(object):
     def nelder_mead(self,
                 step=125.1, no_improve_thr=1e-4,
                 #no_improv_break=40, max_iter=0,
-                no_improv_break=40, max_iter=100,
+                no_improv_break=40, max_iter=500,
                 alpha=11.5, gamma=17., rho=0.55, sigma=0.55):
         '''
             @param f (function): function to optimize, must return a scalar score

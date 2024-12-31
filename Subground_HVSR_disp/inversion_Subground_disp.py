@@ -114,8 +114,8 @@ hvsr_best_f, hvsr_best = mod2.HV()
 ###################################################################################################
 #print("Results",np.shape(results))
 #run2 = HVSR_inversion(hvsr=hvsr,hvsr_freq=f,n=8000,n_burn=1,step_size=0.019,step_floor=0.0,alpha=0.17,beta=1.09,fre1=f1,fre2=f2,Ds=Ds,Dp=Dp,h=h_best,ro=ro_best,Vs=Vs_best,Vp=Vp_best,Vfac=2000,Hfac=50)
-#run2 = HVSR_inversion(hvsr=hvsr,hvsr_freq=f,n=8000,n_burn=1,step_size=0.019,step_floor=0.0,alpha=0.17,beta=1.09,fre1=f1,fre2=f2,Ds=Ds,Dp=Dp,h=h_best,ro=ro_best,Vs=Vs_best,Vp=Vp_best,Vfac=2000,Hfac=50, disp_freq=f_disp, disp_v=vr_disp)
-run2 = HVSR_inversion(hvsr=hvsr,hvsr_freq=f,n=1000,n_burn=1,step_size=0.019,step_floor=0.0,alpha=0.17,beta=1.09,fre1=f1,fre2=f2,Ds=Ds,Dp=Dp,h=h_best,ro=ro_best,Vs=Vs_best,Vp=Vp_best,Vfac=2000,Hfac=50, disp_freq=f_disp, disp_v=vr_disp)
+run2 = HVSR_inversion(hvsr=hvsr,hvsr_freq=f,n=8000,n_burn=1,step_size=0.019,step_floor=0.0,alpha=0.17,beta=1.09,fre1=f1,fre2=f2,Ds=Ds,Dp=Dp,h=h_best,ro=ro_best,Vs=Vs_best,Vp=Vp_best,Vfac=2000,Hfac=50, disp_freq=f_disp, disp_v=vr_disp)
+#run2 = HVSR_inversion(hvsr=hvsr,hvsr_freq=f,n=2000,n_burn=1,step_size=0.019,step_floor=0.0,alpha=0.17,beta=1.09,fre1=f1,fre2=f2,Ds=Ds,Dp=Dp,h=h_best,ro=ro_best,Vs=Vs_best,Vp=Vp_best,Vfac=2000,Hfac=50, disp_freq=f_disp, disp_v=vr_disp)
 results = run2.MCMC_walk()
 h_best2 = results[0]
 Vs_ens2 = results[1]
@@ -148,7 +148,7 @@ plt.legend()
 #plt.savefig("hvsr_inversion_test2_"+station+".png")
 #plt.savefig("hvsr_inversion_test3_"+station+".png")
 plt.savefig("hvsr_inversion_test5_"+station+".png")
-plt.show()
+#plt.show()
 
 #p4p =  HVSR_plotting_functions(h=h,ro=ro,Vs=Vs,Vp=Vp)
 #VS, D = p4p.profile_4_plot()
@@ -183,29 +183,32 @@ plt.ylim(np.max(D2[-3])+40,0)
 #plt.savefig("model2_"+station+".png")
 #plt.savefig("model2_test3_"+station+".png")
 plt.savefig("model2_test5_"+station+".png")
-plt.show()
+#plt.show()
 
 ## plot best dispersion curve
 from BayHunter.surf96_modsw import SurfDisp
-x_obs = fr_disp 
+x_obs = f_disp 
 yobs = vr_disp 
 model = SurfDisp(obsx=x_obs, ref="rdispph")
 vp1 = Vp_best/1000
 vs1 = Vs_best/1000
 h1 = h_best/1000
+h1[-1] = 0
 ro1 = ro_best/1000
 xmod1, ymod1 = model.run_model(h1, vp1, vs1, ro1)
 
 vp2 = Vp_best2/1000
 vs2 = Vs_best2/1000
 h2 = h_best2/1000
+h2[-1] = 0
 ro2 = ro_best2/1000
 xmod2, ymod2 = model.run_model(h2, vp2, vs2, ro2)
 
-plt.xscale("log")
+plt.figure()
 plt.plot(x_obs,yobs,color="xkcd:black",label="Original",linewidth=2)
 plt.plot(xmod1,ymod1,color="xkcd:blood red",label="Inversion NM",linestyle="--")
 plt.plot(xmod2,ymod2,color="xkcd:kelly green",label="Inversion MCMC",linestyle="--")
+plt.legend()
 plt.savefig("dispersion_inversion_test5_"+station+".png")
-plt.show()
+#plt.show()
 
