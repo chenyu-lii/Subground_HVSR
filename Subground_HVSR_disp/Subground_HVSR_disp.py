@@ -810,23 +810,31 @@ class HVSR_inversion(object):
         return ret[n - 1:] / n
 
     def L1_norm(self,):
-        Vs = self.Vs
-        h=self.h
+        #Vs = self.Vs
+        #h=self.h
+        Vs_copy = self.Vs.copy()
+        h_copy = self.h.copy()
         #To invert for Vs and h, we use empirical relationships to get consistent Vp and ro.
-        if (np.all(Vs > 0)):
+        #if (np.all(Vs > 0)):
+        if (np.all(Vs_copy > 0)):
             #Vp = 1000*(Vs/1000 + 1.164)/0.902
             #ro=(310*(Vp*1000)**0.25)/1000
-            Vp = Vs * np.sqrt( (1-self.Poisson)/(0.5 - self.Poisson))
-            ro= 1740 * (Vp/1000)**0.25
+            #Vp = Vs * np.sqrt( (1-self.Poisson)/(0.5 - self.Poisson))
+            #ro= 1740 * (Vp/1000)**0.25
+            Vp_copy = Vs_copy * np.sqrt( (1-self.Poisson)/(0.5 - self.Poisson))
+            ro_copy = 1740 * (Vp_copy/1000)**0.25
 
         else:
-            Vp = 1000*np.ones_like(Vs)
+            #Vp = 1000*np.ones_like(Vs)
+            Vp_copy = 1000*np.ones_like(Vs_copy)
             #ro=(310*(Vp*1000)**0.25)/1000
-            ro= 1740 * (Vp/1000)**0.25
+            #ro= 1740 * (Vp/1000)**0.25
+            ro_copy = 1740 * (Vp_copy/1000)**0.25
         hvsr=self.hvsr
         hvsr_freq = self.hvsr_freq
         
-        mod1 = HVSRForwardModels(ro=ro,Vs=Vs,Vp=Vp,fre1=self.fre1,fre2=self.fre2, f=hvsr_freq, Ds=self.Ds,Dp=self.Dp,h=self.h)
+        #mod1 = HVSRForwardModels(ro=ro,Vs=Vs,Vp=Vp,fre1=self.fre1,fre2=self.fre2, f=hvsr_freq, Ds=self.Ds,Dp=self.Dp,h=self.h)
+        mod1 = HVSRForwardModels(ro=ro_copy,Vs=Vs_copy,Vp=Vp_copy,fre1=self.fre1,fre2=self.fre2, f=hvsr_freq, Ds=self.Ds,Dp=self.Dp,h=h_copy)
         try:
             #mod1 = HVSRForwardModels(ro=ro,Vs=Vs,Vp=Vp,fre1=self.fre1,fre2=self.fre2, Ds=self.Ds,Dp=self.Dp,h=self.h)
             f_c, hvsr_c = mod1.HV()  #Change to try against Transfer function
@@ -842,12 +850,15 @@ class HVSR_inversion(object):
             hvsr_2=np.ones_like(hvsr) * 1e9
             #to=t
             #print(" .... L1 bombed")
-        if (np.any(Vs > 5000)):
+        #if (np.any(Vs > 5000)):
+        if (np.any(Vs_copy > 5000)):
             hvsr_2=np.ones_like(hvsr) * 1e9
-        if (np.any(Vs < 100)):
+        #if (np.any(Vs < 100)):
+        if (np.any(Vs_copy < 100)):
             hvsr_2=np.ones_like(hvsr) * 1e9
         #print("   h:",h)
-        if (np.any(h < 0)):
+        #if (np.any(h < 0)):
+        if (np.any(h_copy < 0)):
             #print("hi") #Not seeing this - why?
             hvsr_2=np.ones_like(hvsr) * 1e9
         std1 = np.std(hvsr[ ( hvsr_freq > 10)&( hvsr_freq < 50)])
@@ -862,20 +873,29 @@ class HVSR_inversion(object):
         x_obs = self.disp_freq
         yobs = self.disp_v
         model = SurfDisp(obsx=x_obs, ref="rdispph")
-        vp_new = Vp/1000
-        vs_new = Vs/1000
-        h_new = h/1000
-        ro_new = ro/1000
+        #vp_new = Vp/1000
+        #vs_new = Vs/1000
+        #h_new = h/1000
+        vp_new = Vp_copy/1000
+        vs_new = Vs_copy/1000
+        h_new = h_copy/1000
+        h_new[-1] = 0
+        #ro_new = ro/1000
+        ro_new = ro_copy/1000
         xmod, ymod = model.run_model(h_new, vp_new, vs_new, ro_new)
-        print('freq:',xmod)
-        print('ymod:',ymod)
+        #print('freq:',xmod)
+        #print('ymod:',ymod)
         rms_disp = np.sqrt(np.mean((ymod - yobs)**2))
-        L2 = L1*0.6 + rms_disp*0.4
-        print(L1, rms_disp)
+        obs_range = np.max(yobs) - np.min(yobs)
+        if obs_range == 0:  # Avoid division by zero
+            rms_new = 0.0 
+        rms_new = rms_disp/abs(obs_range)
+        L2 = L1 + rms_new
+        print(L1, rms_new, L2)
 	    
         #return L1
         return L2
-	    #return L1, L2
+	#return L1, L2
 
 
     def MCMC_step(self,i):
@@ -966,7 +986,8 @@ class HVSR_inversion(object):
 
     def nelder_mead(self,
                 step=125.1, no_improve_thr=1e-4,
-                no_improv_break=40, max_iter=0,
+                #no_improv_break=40, max_iter=0,
+                no_improv_break=40, max_iter=100,
                 alpha=11.5, gamma=17., rho=0.55, sigma=0.55):
         '''
             @param f (function): function to optimize, must return a scalar score
@@ -1013,6 +1034,7 @@ class HVSR_inversion(object):
             if max_iter and iters >= max_iter:
                 return res[0]
             iters += 1
+            print(iters)
 
             # break after no_improv_break iterations with no improvement
             print( '...best so far:', best, self.h)
@@ -1093,6 +1115,7 @@ class HVSR_inversion(object):
         hfac=self.Hfac
         dim2 = np.size(self.Vs)
         result = self.nelder_mead()
+        #result = self.nelder_mead(max_iter=1000)
         Vs = result[0][:dim2]*Vfac
         h = result[0][dim2:]*hfac
         print("Amoeba results:",np.c_[Vs,h])
