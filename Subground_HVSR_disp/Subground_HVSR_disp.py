@@ -890,7 +890,9 @@ class HVSR_inversion(object):
         obs_range = np.max(yobs) - np.min(yobs)
         if obs_range == 0:  # Avoid division by zero
             rms_new = 0.0 
-        rms_new = rms_disp/abs(obs_range)
+        rms_new = rms_disp/abs(obs_range) 
+        rms_new = rms_new * 5
+        # because it is too small, multiply by 5
         L2 = L1 + rms_new
         #print(L1, rms_new, L2)
 	    

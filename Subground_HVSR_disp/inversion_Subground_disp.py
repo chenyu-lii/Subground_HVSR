@@ -137,19 +137,36 @@ print(Vs_best2)
 #print(hvsr_best2)
 #print(hvsr_best_f2)
 
+## save data to csv
+# Create a pandas DataFrame
+#df1 = pd.DataFrame({'Frequency': np.array(f_init), 'HVSR': np.array(hvsr_init)})
+#df1.to_csv('hvsr_init.csv', index=False) 
+#df2 = pd.DataFrame({'Frequency': np.array(hvsr_best_f), 'HVSR': np.array(hvsr_best)})
+#df2.to_csv('hvsr_nm.csv', index=False) 
+#df3 = pd.DataFrame({'Frequency': np.array(hvsr_best_f2), 'HVSR': np.array(hvsr_best2)})
+#df3.to_csv('hvsr_mcmc.csv', index=False) 
+
+##plot hvsr 
+#plt.figure(figsize=(6, 6), dpi=450)
+plt.figure( dpi=450)
+plt.rcParams['axes.linewidth'] = 1.2
 plt.xscale("log")
 plt.plot(f,hvsr,color="xkcd:black",label="Original",linewidth=2)
 plt.plot(f_init,hvsr_init,color="xkcd:midnight blue",label="Initial Condition",linewidth=0.8)
 plt.plot(hvsr_best_f,hvsr_best,color="xkcd:blood red",label="Inversion NM",linestyle="--")
 plt.plot(hvsr_best_f2,hvsr_best2,color="xkcd:kelly green",label="Inversion MCMC",linestyle="--")
-
-plt.legend()
-#plt.savefig("hvsr_inversion_test2.png")
-#plt.savefig("hvsr_inversion_test2_"+station+".png")
+plt.xlabel('Frequency (Hz)', fontsize=16)
+plt.ylabel('HVSR', fontsize=16)
+plt.legend(fontsize=12)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+# Save the figure
 #plt.savefig("hvsr_inversion_test3_"+station+".png")
-plt.savefig("hvsr_inversion_test5_"+station+".png")
+plt.savefig("hvsr_inversion_test5_"+station+".png", dpi=450, bbox_inches='tight')
 #plt.show()
 
+
+## plot velocity model
 #p4p =  HVSR_plotting_functions(h=h,ro=ro,Vs=Vs,Vp=Vp)
 #VS, D = p4p.profile_4_plot()
 p5p = HVSR_plotting_functions(h=h_best,ro=ro_best,Vs=Vs_best,Vp=Vp_best)
@@ -159,8 +176,20 @@ VS0,D0 = p0p.profile_4_plot()
 p2p = HVSR_plotting_functions(h=h_best2,ro=ro_best2,Vs=Vs_best2,Vp=Vp_best2)
 VS2,D2 = p2p.profile_4_plot()
 
-plt.clf()
+## save data to csv
+## Create a pandas DataFrame
+#df1 = pd.DataFrame({'vs': np.array(VS0), 'h': np.array(D0)})
+#df1.to_csv('velocity_model_original.csv', index=False) 
+#df2 = pd.DataFrame({'vs': np.array(VS5), 'h': np.array(D5)})
+#df2.to_csv('velocity_model_nm.csv', index=False) 
+#df3 = pd.DataFrame({'vs': np.array(VS2), 'h': np.array(D2)})
+#df3.to_csv('velocity_model_mcmc.csv', index=False) 
 
+
+#plt.figure(figsize=(6, 6), dpi=450)
+plt.figure( dpi=450)
+plt.clf()
+plt.rcParams['axes.linewidth'] = 1.2
 
 #for i in range(len(Vs_ens2[:,0])):
     #p4pa =  HVSR_plotting_functions(h=h_ens2[i,:],ro=ro,Vs=Vs_ens2[i,:],Vp=Vp)
@@ -173,16 +202,18 @@ plt.clf()
 plt.plot(VS0,D0,color="xkcd:midnight blue",linewidth=0.8,label="Initial Condition")
 plt.plot(VS5,D5,color="xkcd:blood red",label="Inversion NM",linestyle="--")
 plt.plot(VS2,D2,color="xkcd:kelly green",label="Inversion MCMC",linestyle="--")
-
-plt.legend()
-
+plt.xlabel('Vs (m/s)', fontsize=16)
+plt.ylabel('Depth (m)', fontsize=16)
+plt.legend(fontsize=12) 
+plt.xticks(fontsize=14) 
+plt.yticks(fontsize=14)
 #plt.ylim(np.max(D[-3])+40,0)
 plt.ylim(np.max(D2[-3])+40,0)
 #plt.xlim(np.min(VS)-50,np.max(VS)+50)
 #plt.savefig("model2.png")
 #plt.savefig("model2_"+station+".png")
 #plt.savefig("model2_test3_"+station+".png")
-plt.savefig("model2_test5_"+station+".png")
+plt.savefig("model2_test5_"+station+".png", dpi=450, bbox_inches='tight')
 #plt.show()
 
 ## plot best dispersion curve
@@ -204,11 +235,41 @@ h2[-1] = 0
 ro2 = ro_best2/1000
 xmod2, ymod2 = model.run_model(h2, vp2, vs2, ro2)
 
-plt.figure()
+#plt.figure(figsize=(6, 6), dpi=450)
+plt.figure( dpi=450)
+plt.rcParams['axes.linewidth'] = 1.2
 plt.plot(x_obs,yobs,color="xkcd:black",label="Original",linewidth=2)
 plt.plot(xmod1,ymod1,color="xkcd:blood red",label="Inversion NM",linestyle="--")
 plt.plot(xmod2,ymod2,color="xkcd:kelly green",label="Inversion MCMC",linestyle="--")
-plt.legend()
-plt.savefig("dispersion_inversion_test5_"+station+".png")
+plt.xlabel('Period (s)', fontsize=16)
+plt.ylabel('Velocity (km/s)', fontsize=16)
+plt.legend(fontsize=12) 
+plt.xticks(fontsize=14) 
+plt.yticks(fontsize=14)
+#plt.legend()
+plt.savefig("dispersion_inversion_test5_"+station+".png", dpi=450, bbox_inches='tight')
 #plt.show()
+
+## save data to csv
+# Create a pandas DataFrame
+df2 = pd.DataFrame({'period': np.array(xmod1), 'velocity': np.array(ymod1)})
+df2.to_csv('disp_fit_nm.csv', index=False) 
+df3 = pd.DataFrame({'period': np.array(xmod2), 'velocity': np.array(ymod2)})
+df3.to_csv('disp_fit_mcmc.csv', index=False) 
+
+# Create a pandas DataFrame
+df1 = pd.DataFrame({'Frequency': np.array(f_init), 'HVSR': np.array(hvsr_init)})
+df1.to_csv('hvsr_init.csv', index=False) 
+df2 = pd.DataFrame({'Frequency': np.array(hvsr_best_f), 'HVSR': np.array(hvsr_best)})
+df2.to_csv('hvsr_nm.csv', index=False) 
+df3 = pd.DataFrame({'Frequency': np.array(hvsr_best_f2), 'HVSR': np.array(hvsr_best2)})
+df3.to_csv('hvsr_mcmc.csv', index=False) 
+
+## Create a pandas DataFrame
+df1 = pd.DataFrame({'vs': np.array(VS0), 'h': np.array(D0)})
+df1.to_csv('velocity_model_original.csv', index=False) 
+df2 = pd.DataFrame({'vs': np.array(VS5), 'h': np.array(D5)})
+df2.to_csv('velocity_model_nm.csv', index=False) 
+df3 = pd.DataFrame({'vs': np.array(VS2), 'h': np.array(D2)})
+df3.to_csv('velocity_model_mcmc.csv', index=False) 
 
